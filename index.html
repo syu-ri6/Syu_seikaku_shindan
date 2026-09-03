@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>あんた何うさぎ？｜なんか遊んでたら性格バレるやつ</title>
+<style>
+:root{
+  --bg:#fff7fb;
+  --card:#ffffff;
+  --ink:#26212a;
+  --muted:#7b7282;
+  --line:#eadce6;
+  --accent:#ff7ab6;
+  --accent2:#9f8cff;
+  --good:#2bb673;
+  --shadow:0 14px 36px rgba(73,45,68,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:linear-gradient(180deg,#fff7fb,#f8f6ff);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+button,input,textarea{font:inherit}
+body{min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 48px}
+.topbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:3;padding:10px 0;background:linear-gradient(180deg,rgba(255,247,251,.96),rgba(255,247,251,.78),transparent)}
+.brand{font-weight:900;font-size:15px}
+.progress{flex:1;height:10px;background:#f0e7ef;border-radius:999px;overflow:hidden}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.25s}
+.count{font-size:12px;color:var(--muted);min-width:46px;text-align:right}
+.card{background:var(--card);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:24px 18px;min-height:560px;display:flex;flex-direction:column;justify-content:center}
+h1{font-size:34px;line-height:1.12;margin:0 0 10px}
+h2{font-size:28px;line-height:1.18;margin:0 0 12px}
+.sub{color:var(--muted);line-height:1.7}
+.small{font-size:12px;color:var(--muted)}
+.center{text-align:center}
+.btn{border:none;border-radius:18px;padding:15px 18px;background:#25202a;color:white;font-weight:800;cursor:pointer;width:100%;margin-top:14px}
+.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.accent{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.big-red{width:180px;height:180px;border-radius:999px;background:#ff4f66;border:none;color:white;font-weight:900;font-size:28px;box-shadow:0 12px 0 #d73349,0 20px 35px rgba(255,79,102,.25);cursor:pointer;margin:20px auto}
+.big-red:active{transform:translateY(6px);box-shadow:0 6px 0 #d73349}
+.slider-wrap{padding:18px 2px}
+.labels{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--accent);margin:18px 0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.choice{border:1px solid var(--line);background:#fff;border-radius:18px;padding:16px 12px;min-height:66px;font-weight:800;cursor:pointer;text-align:center}
+.choice.selected{outline:3px solid rgba(255,122,182,.28);border-color:var(--accent);background:#fff8fc}
+.choice.large{min-height:92px;display:flex;align-items:center;justify-content:center}
+.stack{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.pill{padding:12px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer;font-weight:800}
+.pill.selected{background:#fff0f7;border-color:#ffc3dc}
+.float-cloud{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.dragbox{border:2px dashed #d8cad4;border-radius:22px;min-height:110px;margin-top:18px;padding:14px}
+.dragbox .hint{color:var(--muted);font-size:13px;text-align:center}
+.room{position:relative;height:330px;border-radius:26px;background:#faf4f7;border:1px solid var(--line);overflow:hidden;margin-top:14px}
+.seat{position:absolute;border:none;border-radius:20px;background:white;border:1px solid var(--line);padding:12px;cursor:pointer;font-weight:800}
+.people{position:absolute;top:36px;left:50%;transform:translateX(-50%);font-size:38px}
+.calendar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.timecard{border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center;background:#fff;cursor:pointer}
+.timeline{border:2px dashed #d8cad4;border-radius:20px;padding:10px;min-height:220px;margin-top:12px}
+.timeline .slot{padding:12px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:8px}
+.pathbox{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.path{min-height:220px;border-radius:24px;border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;justify-content:flex-end;font-weight:900;cursor:pointer}
+.path.safe{background:linear-gradient(#eef8ff,#fff)}
+.path.unknown{background:linear-gradient(#eeeaff,#fff4fc)}
+.input{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;outline:none;margin-top:10px;background:#fff}
+textarea.input{min-height:95px;resize:vertical}
+.phone{border:12px solid #222;border-radius:34px;background:#fff;padding:22px 14px;margin:18px auto;max-width:320px}
+.msg{background:#e9f1ff;border-radius:16px;padding:10px 12px;display:inline-block}
+.face-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:16px}
+.face{aspect-ratio:1;border:1px solid var(--line);background:#fff;border-radius:20px;font-size:32px;cursor:pointer}
+.countdown{font-size:74px;font-weight:1000;text-align:center}
+.sortable{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.sortitem{padding:14px;border:1px solid var(--line);border-radius:16px;background:white;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.sortitem button{border:none;background:#f5edf3;border-radius:10px;padding:6px 10px}
+.result-head{text-align:center}
+.rabbit{font-size:72px}
+.type-title{font-size:32px;font-weight:1000;line-height:1.14}
+.badge{display:inline-block;background:#fff0f7;border:1px solid #ffc6de;color:#a83b6d;border-radius:999px;padding:8px 12px;font-weight:900;margin:6px 4px}
+.section{margin-top:28px;padding-top:22px;border-top:1px dashed var(--line)}
+.checks{display:flex;flex-direction:column;gap:10px}
+.check{background:#faf7fb;border-radius:16px;padding:12px 14px}
+.quote{background:#fff8fc;border-left:5px solid var(--accent);padding:16px;border-radius:0 18px 18px 0;line-height:1.9}
+.meterrow{display:grid;grid-template-columns:120px 1fr 40px;align-items:center;gap:8px;margin:9px 0;font-size:13px}
+.meter{height:9px;background:#eee5ec;border-radius:999px;overflow:hidden}
+.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.relationship{background:linear-gradient(135deg,#fff1f8,#f0edff);border:1px solid #ead9ee;border-radius:24px;padding:18px;margin-top:14px}
+.system{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#1d1b22;color:#f7f7fb;padding:18px;border-radius:20px;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;padding:12px 16px;border-radius:999px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:10}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:520px){
+  .card{min-height:calc(100vh - 95px);border-radius:22px;padding:22px 15px}
+  h1{font-size:30px} h2{font-size:25px}
+  .grid{grid-template-columns:1fr 1fr}
+  .meterrow{grid-template-columns:96px 1fr 34px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar" id="topbar" style="display:none">
+    <div class="brand">🐰 あんた何うさぎ？</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="count" id="count"></div>
+  </div>
+  <main class="card" id="app"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const app = document.getElementById('app');
+const topbar = document.getElementById('topbar');
+const bar = document.getElementById('bar');
+const count = document.getElementById('count');
+const toastEl = document.getElementById('toast');
+
+const dims = ['E','O','C','A','N','AX','AV','BAS'];
+const score = Object.fromEntries(dims.map(k=>[k,0]));
+const weight = Object.fromEntries(dims.map(k=>[k,0]));
+const extras = {
+  intimacyGap:0,
+  selfFreedom:null,
+  behaviorFreedom:null,
+  deliberationChange:0,
+  stressShift:0,
+  consistency:[],
+  brag:'',
+  selfOdd:'',
+  seat:'',
+  eyeEgg:'',
+  scheduleCreated:0,
+  conflictNormal:null,
+  conflictClose:null,
+  socialMood:null
+};
+let step = -1;
+
+function add(axis,val,w=1){ score[axis]+=val*w; weight[axis]+=Math.abs(w); }
+function toast(t){ toastEl.textContent=t; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'),1300); }
+function next(){ step++; render(); }
+function updateProgress(){
+  if(step<0 || step>=30){topbar.style.display='none';return;}
+  topbar.style.display='flex';
+  bar.style.width=((step)/30*100)+'%';
+  count.textContent=(step+1)+'/30';
+}
+function normalize(axis){
+  const w = weight[axis] || 1;
+  const raw = score[axis]/w; // roughly -3..3
+  return Math.max(0, Math.min(100, Math.round((raw+3)/6*100)));
+}
+function setHTML(h){ app.innerHTML=h; updateProgress(); window.scrollTo({top:0,behavior:'smooth'}); }
+function btn(label,fn,cls='btn accent'){ const b=document.createElement('button'); b.className=cls; b.textContent=label; b.onclick=fn; return b; }
+
+function intro(){
+  setHTML(`
+    <div class="center">
+      <div class="rabbit">🐰</div>
+      <h1>あんた何うさぎ？</h1>
+      <p class="sub">なんか遊んでたら性格バレるやつ</p>
+      <p style="line-height:1.9;margin-top:24px">ちょっとあなたのこと知りたいから遊んでって〜！<br>むずいことないよ。なんとなくでやって！</p>
+      <p><strong>正解とかないし、最終的に勝手にうさぎにします。</strong></p>
+      <p class="small">心理学・行動傾向を参考にした「性格傾向」の遊びです。医療・診断目的ではありません。</p>
+      <button class="btn accent" onclick="step=0;render()">やるー！</button>
+    </div>`);
+}
+function sliderScreen(title,left,right,onDone,initial=50,extra=''){
+  setHTML(`<h2>${title}</h2>${extra}<div class="slider-wrap"><div class="labels"><span>${left}</span><span>${right}</span></div><input id="r" type="range" min="0" max="100" value="${initial}"></div><button id="ok" class="btn accent">これ！</button>`);
+  document.getElementById('ok').onclick=()=>onDone(+document.getElementById('r').value);
+}
+function multiSelectScreen(title,items,max,onDone,sub=''){
+  setHTML(`<h2>${title}</h2><p class="sub">${sub}</p><div class="float-cloud" id="cloud">${items.map(x=>`<button class="pill" data-v="${x}">${x}</button>`).join('')}</div><button id="ok" class="btn accent" disabled>これで！</button>`);
+  const selected=[];
+  app.querySelectorAll('.pill').forEach(el=>el.onclick=()=>{
+    const v=el.dataset.v;
+    if(selected.includes(v)){selected.splice(selected.indexOf(v),1);el.classList.remove('selected')}
+    else if(selected.length<max){selected.push(v);el.classList.add('selected')}
+    document.getElementById('ok').disabled = selected.length!==max;
+  });
+  document.getElementById('ok').onclick=()=>onDone(selected);
+}
+function chooseScreen(title,choices,onDone,sub=''){
+  setHTML(`<h2>${title}</h2><p class="sub">${sub}</p><div class="grid">${choices.map((c,i)=>`<button class="choice large" data-i="${i}">${c}</button>`).join('')}</div>`);
+  app.querySelectorAll('.choice').forEach(el=>el.onclick=()=>onDone(+el.dataset.i));
+}
+function render(){
+  if(step<0){ intro(); return; }
+  if(step>=30){ showAnalysis(); return; }
+  updateProgress();
+
+  switch(step){
+    case 0:
+      setHTML(`<div class="center"><p class="small">01</p><h2>絶対押すな</h2><p class="sub">ほんとに。</p><button class="big-red" id="red">押すな</button><button class="btn secondary" id="skip">次いく</button></div>`);
+      document.getElementById('red').onclick=()=>{add('O',2);add('BAS',2);add('C',-.5);toast('押すんかいwwwwww');setTimeout(next,700)};
+      document.getElementById('skip').onclick=()=>{add('C',1);add('BAS',-.5);toast('ちゃんと言うこと聞くじゃん');setTimeout(next,700)};
+      break;
+
+    case 1:
+      sliderScreen('今日、人間と会える？','人間むり','人間こい！！！',v=>{
+        extras.socialMood=v; add('E',(v-50)/20); add('N',(50-v)/80); toast(v>70?'元気だね〜〜〜！':'なるほどね〜〜〜👀'); next();
+      });
+      break;
+
+    case 2:
+      multiSelectScreen('はい突然ですが','自由,安心,愛,お金,刺激,時間,仲間,睡眠'.split(','),3,sel=>{
+        sel.forEach(v=>{
+          if(v==='自由'){add('O',1.5);add('AV',.5)}
+          if(v==='安心'){add('C',1);add('N',.5)}
+          if(v==='愛'){add('A',1.5);add('AX',1)}
+          if(v==='お金'){add('C',.7)}
+          if(v==='刺激'){add('O',1.5);add('BAS',1.5)}
+          if(v==='時間'){add('AV',.7);add('C',.5)}
+          if(v==='仲間'){add('E',1.2);add('A',1)}
+          if(v==='睡眠'){add('N',-.4);add('C',.3)}
+        }); toast('それ持ってくんだww'); next();
+      },'この中から3つだけ持ってっていいよ');
+      break;
+
+    case 3:
+      setHTML(`<h2>知らん人たちの部屋に放り込まれました</h2><p class="sub">好きなとこ座って</p>
+      <div class="room">
+        <div class="people">🧑‍🤝‍🧑</div>
+        <button class="seat" data-s="near" style="left:38%;top:105px">人の隣</button>
+        <button class="seat" data-s="window" style="right:18px;top:110px">窓際</button>
+        <button class="seat" data-s="floor" style="left:18px;bottom:30px">床</button>
+        <button class="seat" data-s="far" style="right:30px;bottom:30px">離れた椅子</button>
+        <button class="seat" data-s="middle" style="left:42%;bottom:40px">真ん中</button>
+      </div>`);
+      app.querySelectorAll('.seat').forEach(el=>el.onclick=()=>{
+        const s=el.dataset.s; extras.seat=s;
+        if(s==='near'){add('E',2);add('AV',-1)}
+        if(s==='middle'){add('E',1);add('AV',-.5)}
+        if(s==='window'){add('O',.5);add('AV',1)}
+        if(s==='floor'){add('O',.7);add('E',-.3)}
+        if(s==='far'){add('E',-1.5);add('AV',2)}
+        toast('そこなんだwwww'); next();
+      });
+      break;
+
+    case 4:
+      sliderScreen('今日の予定、全部なくなりました。','😭','🎉',v=>{
+        add('C',(50-v)/20); add('E',(50-v)/70); add('N',(50-v)/90); add('BAS',(v-50)/80);
+        extras.consistency.push({k:'scheduleFreedom',v}); toast('顔wwwwww'); next();
+      },50,'<p class="sub">急に。全部。</p>');
+      break;
+
+    case 5:
+      multiSelectScreen('このへんまでなら貸せる','充電器,服,イヤホン,1000円,スマホ本体,家の鍵'.split(','),3,sel=>{
+        const intimacy = sel.length;
+        add('A',1); add('AV', sel.includes('家の鍵')?-2:1);
+        if(sel.includes('スマホ本体')) add('AV',-1);
+        if(sel.includes('1000円')) add('A',1);
+        toast('境界線そこね〜'); next();
+      },'「まあ貸せるかな」ってやつを3つ');
+      break;
+
+    case 6:
+      chooseScreen('ごめん、一個だけ没収します',['自由','安心','愛情','刺激'],i=>{
+        const x=['自由','安心','愛情','刺激'][i];
+        if(x==='自由'){add('O',-1);add('C',1)}
+        if(x==='安心'){add('N',-1);add('BAS',1)}
+        if(x==='愛情'){add('A',-1);add('AV',1)}
+        if(x==='刺激'){add('O',-1);add('BAS',-1)}
+        toast('それ捨てるんだ！！！'); next();
+      },'いらんやつ、ひとつ。');
+      break;
+
+    case 7:
+      sliderScreen('「ちょっと話したい」って来た','今聞く','ちょい待って',v=>{
+        add('E',(50-v)/30); add('A',(50-v)/35); add('AV',(v-50)/25); toast('ほーん'); next();
+      });
+      break;
+
+    case 8:
+      sliderScreen('「今日なんか変じゃない？」って言われた','別に？','え、どこが！？',v=>{
+        add('N',(v-50)/20); add('AX',(v-50)/35); toast(v>70?'気になるよなww':'強いwwww'); next();
+      });
+      break;
+
+    case 9:
+      setHTML(`<h2>帰るだけです。どっち行く？</h2><div class="pathbox">
+        <button class="path safe" id="safe"><span>いつもの道</span></button>
+        <button class="path unknown" id="unknown"><span>なんか知らん道 ✨</span></button>
+      </div>`);
+      document.getElementById('safe').onclick=()=>{add('O',-1.5);add('C',.5);toast('今日は帰ろ帰ろ');next()};
+      document.getElementById('unknown').onclick=()=>{add('O',2);add('BAS',1.5);toast('絶対なんかあるもんね！！');next()};
+      break;
+
+    case 10:
+      setHTML(`<h2>はい、自慢して</h2><p class="sub">20文字まで！なんでもいい！！！<br>「足速い」とかでもいい！！！</p><input class="input" maxlength="20" id="brag" placeholder="ここに自慢"><button class="btn accent" id="ok">言った！</button>`);
+      document.getElementById('ok').onclick=()=>{extras.brag=document.getElementById('brag').value.trim();toast('いいじゃーん！！！！もっと自慢して生きろー！！！');setTimeout(next,800)};
+      break;
+
+    case 11:
+      sliderScreen('あんた今日めっちゃいいじゃん！！！','そうでしょ？','いやいやいや',v=>{
+        add('N',(v-50)/35); add('E',(50-v)/50); toast('褒められた時くらい受け取っとけー！！！ww'); next();
+      },45,'<p class="sub">なんか知らんけど！！！</p>');
+      break;
+
+    case 12:
+      setHTML(`<h2>既読。</h2><div class="phone"><div class="msg">今日どうするー？</div><p class="small">既読 18:42</p><p style="font-weight:900;margin-top:36px">現在 20:17</p></div><button class="btn accent" id="go">で？</button>`);
+      document.getElementById('go').onclick=()=>sliderScreen('気になる？','全然','めっちゃ',v=>{add('AX',(v-50)/16);add('N',(v-50)/40);toast(v>65?'気になるよね〜':'全然いけるタイプね');next();});
+      break;
+
+    case 13:
+      multiSelectScreen('普通の人にはイヤだけど','急な電話,返信遅い,服を借りる,突然会いに来る,長電話,家に来る,予定変更,甘えてくる'.split(','),3,sel=>{
+        extras.intimacyGap += sel.length;
+        add('A',1); add('AX',1.2); add('AV',-1);
+        toast('はいはい特別扱いね〜〜〜ww'); next();
+      },'好きな人なら「まあいいかも」ってやつを3つ');
+      break;
+
+    case 14:
+      setHTML(`<h2>明日の予定、好きに作って</h2><p class="sub">押した順に入るよ。もういいと思ったら終わり。</p>
+      <div class="grid" id="cards">${['起きる','ごはん','仕事/学校','遊ぶ','休む','風呂','寝る'].map(x=>`<button class="choice" data-v="${x}">${x}</button>`).join('')}</div>
+      <div class="timeline" id="tl"><div class="small">ここに予定が入ります</div></div><button class="btn secondary" id="done">もういい</button>`);
+      const arr=[];
+      app.querySelectorAll('[data-v]').forEach(el=>el.onclick=()=>{
+        if(arr.includes(el.dataset.v))return;
+        arr.push(el.dataset.v); el.classList.add('selected');
+        document.getElementById('tl').innerHTML=arr.map((x,i)=>`<div class="slot">${i+1}. ${x}</div>`).join('');
+      });
+      document.getElementById('done').onclick=()=>{extras.scheduleCreated=arr.length;add('C',(arr.length-3)/1.5);toast(arr.length>5?'めっちゃ組むじゃんww':'なるほどそのくらいね');next()};
+      break;
+
+    case 15:
+      sliderScreen('SYSTEM：予定が変更されました','😌','🤬',v=>{
+        add('C',(v-50)/22);add('N',(v-50)/30);add('BAS',(50-v)/70);
+        extras.stressShift += Math.abs(v-50)/25; toast(v>75?'そんな怒る！？ww':'意外と平気ね'); next();
+      },55,'<p class="sub">さっき作った予定、勝手に動かしました。お気持ちをどうぞ。</p>');
+      break;
+
+    case 16:
+      chooseScreen('箱があります。',['開ける','一旦触る','放置して進む'],i=>{
+        if(i===0){add('O',2.5);add('BAS',2)}
+        if(i===1){add('O',1);add('BAS',.5)}
+        if(i===2){add('O',-1);add('C',1)}
+        toast(['開けるよなーー！！！','一旦触るんだww','えらい。たぶん。'][i]); next();
+      },'光ってます。以上。');
+      break;
+
+    case 17:
+      setHTML(`<h2>なんか一人だけ違くない？</h2><p class="sub">気になった人を押して</p><div class="face-grid">${['🙂','🙂','🙂','😐','🙂'].map((x,i)=>`<button class="face" data-i="${i}">${x}</button>`).join('')}</div>`);
+      app.querySelectorAll('.face').forEach(el=>el.onclick=()=>{const hit=+el.dataset.i===3;if(hit){add('A',2);add('N',.5)}else{add('A',.3)}toast('そこ見たんだ');next()});
+      break;
+
+    case 18:
+      sliderScreen('その人「別に大丈夫だよ〜」って言ってます','そっか！','いや絶対なんかある',v=>{
+        add('A',(v-50)/28);add('AX',(v-50)/40);add('N',(v-50)/45); toast('本人平気って言ってるよ？wwww'); next();
+      });
+      break;
+
+    case 19:
+      setHTML(`<h2>明日丸一日休み！</h2><p class="sub">5秒で決めて！！！</p><div class="countdown" id="cd">5</div><div class="grid" id="quick">${['知らん街行く','家でゴロゴロ','友達呼ぶ','一人で趣味','なんか新しいこと'].map((x,i)=>`<button class="choice" data-i="${i}">${x}</button>`).join('')}</div>`);
+      let t=5, chosen=null; const int=setInterval(()=>{t--;document.getElementById('cd').textContent=Math.max(t,0);if(t<=0){clearInterval(int);if(chosen===null){extras.deliberationChange+=1;add('C',1);toast('時間切れwwww');setTimeout(next,500)}}},1000);
+      app.querySelectorAll('#quick .choice').forEach(el=>el.onclick=()=>{if(chosen!==null)return;chosen=+el.dataset.i;clearInterval(int);extras.quickChoice=chosen;add('BAS',1.5);if([0,4].includes(chosen)){add('O',1.5);add('BAS',1)}if(chosen===1){add('E',-1)}if(chosen===2){add('E',1.5)}toast('決めた！');next()});
+      break;
+
+    case 20:
+      chooseScreen('はい今度はゆっくり考えていいよ',['知らん街行く','家でゴロゴロ','友達呼ぶ','一人で趣味','なんか新しいこと'],i=>{
+        extras.slowChoice=i;
+        if(extras.quickChoice!==undefined && extras.quickChoice!==i) extras.deliberationChange+=2;
+        if([0,4].includes(i)) add('O',1);
+        if(i===2) add('E',1);
+        if(i===1||i===3) add('E',-.6);
+        toast(extras.quickChoice===i?'意志かたww':'変わったwwww');next();
+      });
+      break;
+
+    case 21:
+      setHTML(`<h2>今日ちょっとイヤなことありました</h2><p class="sub">最初にやりそうな順に3個選んで</p><div class="grid">${['誰かに話す','一人で考える','寝る','食べる','音楽聴く','動く','何もせん','一旦忘れる'].map(x=>`<button class="choice" data-v="${x}">${x}</button>`).join('')}</div><div id="picked" class="small" style="margin-top:14px"></div>`);
+      const pick=[];
+      app.querySelectorAll('[data-v]').forEach(el=>el.onclick=()=>{
+        if(pick.includes(el.dataset.v)||pick.length>=3)return;
+        pick.push(el.dataset.v); el.classList.add('selected');document.getElementById('picked').textContent=pick.join(' → ');
+        if(pick.length===3){
+          pick.forEach((x,idx)=>{
+            const m=(3-idx)/3;
+            if(x==='誰かに話す'){add('E',1.5,m);add('A',1,m);add('AV',-1,m)}
+            if(x==='一人で考える'){add('N',1,m);add('O',.8,m);add('AV',1,m)}
+            if(x==='寝る'){add('AV',.3,m);add('N',-.2,m)}
+            if(x==='食べる'){add('BAS',.3,m)}
+            if(x==='音楽聴く'){add('O',.5,m)}
+            if(x==='動く'){add('BAS',1.2,m);add('N',-.5,m)}
+            if(x==='何もせん'){add('AV',.8,m)}
+            if(x==='一旦忘れる'){add('N',-.8,m);add('BAS',.4,m)}
+          });setTimeout(()=>{toast('なるほどね〜');next()},400);
+        }
+      });
+      break;
+
+    case 22:
+      sliderScreen('大事な人と喧嘩しました','今すぐ話す','数日ほしい',v=>{
+        extras.conflictNormal=v;add('AV',(v-50)/16);add('AX',(50-v)/45);add('N',(v-50)/60);toast('はいはい');next();
+      },50,'<p class="sub">どんくらいほっといてほしい？</p>');
+      break;
+
+    case 23:
+      sliderScreen('ちなみに、めーーーーっちゃ好きな人です','今すぐ話す','数日ほしい',v=>{
+        extras.conflictClose=v;
+        extras.intimacyGap += Math.abs((extras.conflictNormal??50)-v)/20;
+        add('AV',(v-50)/22); add('AX',(50-v)/28);
+        toast(Math.abs((extras.conflictNormal??50)-v)>25?'変わるやんwwwwww':'そこは変わらんのね！'); next();
+      },50);
+      break;
+
+    case 24:
+      sliderScreen('自分ではどっちだと思う？','自由人','きっちり人間',v=>{
+        extras.selfFreedom=100-v; add('O',(50-v)/60);add('C',(v-50)/60); toast('ふーん、自分ではね👀'); next();
+      });
+      break;
+
+    case 25:
+      chooseScreen('じゃあ実際どっち取る？',['ずっと楽しみにしてた予定','急に誘われた遠出'],i=>{
+        extras.behaviorFreedom=i===1?85:25;
+        if(i===1){add('O',1.8);add('BAS',1.8);add('C',-.5)}
+        else{add('C',1.8);add('O',-.3)}
+        toast('なるほどなるほど');next();
+      },'どっちも楽しそうです。');
+      break;
+
+    case 26:
+      setHTML(`<h2>絶対なくしたくない順に並べて</h2><p class="sub">↑↓で並べ替えてね</p><div class="sortable" id="sort"></div><button class="btn accent" id="ok">これ！</button>`);
+      let vals=['人とのつながり','自由','自分の時間','安心','刺激'];
+      const draw=()=>{
+        document.getElementById('sort').innerHTML=vals.map((x,i)=>`<div class="sortitem"><span>${i+1}. ${x}</span><span><button data-u="${i}">↑</button> <button data-d="${i}">↓</button></span></div>`).join('');
+        app.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const i=+b.dataset.u;if(i>0){[vals[i-1],vals[i]]=[vals[i],vals[i-1]];draw()}});
+        app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=+b.dataset.d;if(i<vals.length-1){[vals[i+1],vals[i]]=[vals[i],vals[i+1]];draw()}});
+      }; draw();
+      document.getElementById('ok').onclick=()=>{
+        vals.forEach((x,i)=>{const pts=(4-i)/2;if(x==='人とのつながり'){add('A',pts);add('AX',pts/2)}if(x==='自由'){add('O',pts);add('AV',pts/2)}if(x==='自分の時間'){add('AV',pts)}if(x==='安心'){add('C',pts);add('N',pts/3)}if(x==='刺激'){add('O',pts/2);add('BAS',pts)}});
+        toast('一位それなんだ〜！！');next();
+      };
+      break;
+
+    case 27:
+      setHTML(`<h2>自分で「私ここ意味わからんな」って思うとこある？</h2><p class="sub">30文字まで。なければ「ない！」でもOK。</p><textarea class="input" maxlength="30" id="odd" placeholder="例：寂しいのに一人になりたがる"></textarea><button class="btn accent" id="ok">これかな</button>`);
+      document.getElementById('ok').onclick=()=>{extras.selfOdd=document.getElementById('odd').value.trim();toast('いやでも人間そんなもんじゃーん！！！ww');setTimeout(next,700)};
+      break;
+
+    case 28:
+      chooseScreen('🍳 目玉焼き何かける？',['しょうゆ','塩','ソース','ケチャップ','何も','その他'],i=>{
+        extras.eyeEgg=['しょうゆ','塩','ソース','ケチャップ','何も','その他'][i];next();
+      });
+      break;
+
+    case 29:
+      setHTML(`<h2>SYSTEM：解析開始</h2><div class="system" id="sys">PERSONALITY DATA...<br><br>対人行動……解析中<br>行動選択……解析中<br>親密傾向……解析中<br>目玉焼き……解析中</div><button class="btn accent" id="go">解析する</button>`);
+      document.getElementById('go').onclick=()=>{
+        const s=document.getElementById('sys');
+        s.innerHTML=`PERSONALITY DATA... OK<br><br>対人行動……OK<br>行動選択……OK<br>親密傾向……OK<br><span style="color:#ff8dac">目玉焼き……ERROR</span><br><br>目玉焼き情報は診断に不要です`;
+        toast('今の全然関係ないでーす！！！wwwwww');
+        setTimeout(()=>{step=30;render()},1700);
+      };
+      break;
+  }
+}
+
+// Rabbit prototypes and copy
+const rabbits = [
+ {id:'noisy',name:'懐くとうるさうさぎ',p:{E:72,O:60,C:50,A:76,N:45,AX:45,AV:55,BAS:66},w:{E:2,A:2,AV:1.5,O:.5},
+  checks:['最初は一応様子を見る','仲良くなると喋る量が急に増える','安心した人にはどうでもいいことまで報告する','誰にでも同じテンションではない','仲良くなった後に「最初と全然違う」って言われがち'],
+  text:'最初ちょっと大人しくしてるくせに、仲良くなった瞬間めっちゃ喋るタイプでしょwwww<br><br>でもそれって、ちゃんと「この人なら大丈夫」って思えた相手に自分を出せてるってことじゃん。誰にでも同じ自分を見せないからこそ、全開モードを見れる人はきっと「心開いてくれてるんだ」ってうれしいと思うよ。<br><br><strong>最初静かなのはまあフェイクだけどwwww　好きな人たちの前では、これからも遠慮なくうるさくしてこー！！！</strong>',
+  relation:'会話終わらん組',rel:{親友:98,恋人:86,同居:67,悪ノリ:96}},
+ {id:'brain',name:'脳内大事件うさぎ',p:{E:45,O:82,C:55,A:58,N:86,AX:58,AV:45,BAS:45},w:{N:3,O:2,AX:1},
+  checks:['ひとつ気になると、その周辺まで考え始める','あとから会話を思い返すことがある','「なんでそうなった？」まで知りたくなる','納得できると急に落ち着く','自分では普通に考えてるだけなのに「考えすぎ」って言われる'],
+  text:'一個の出来事から考えること多すぎwwww<br><br>でも、そこまで考えられるってことは、自分のことだけじゃなく相手の立場や気持ちまで想像できるってことでもあるじゃん。人が流す小さい変化に気づいたり、「今ちょっと困ってる？」って先に動けたり。<br><br>きっと自分では普通にやってることでも、<strong>「気づいてくれてうれしかった」って思ってる人いるよ。</strong><br><br><strong>考えすぎではある！！！wwww　でもその感度まで小さくしなくていいよ。その目でいっぱい人も世界も見てこー！！！</strong>',
+  relation:'深夜に話し始めたら終わらん組',rel:{親友:96,恋人:82,同居:61,深夜語り:100}},
+ {id:'impulse',name:'だいたい勢いうさぎ',p:{E:65,O:86,C:30,A:52,N:40,AX:35,AV:35,BAS:92},w:{BAS:3,O:2,C:2},
+  checks:['「やりたい」が決まると動き出すのが早い','説明書は始めてから読む','面白そうだと予定がちょっと弱くなる','未来の自分に後処理を任せがち','経験値だけはどんどん増える'],
+  text:'「やりたい！」が先！！！「どうやる？」は後！！！順番逆ですwwww<br><br>でも、実際に最初の一歩を踏める人って意外と少ないんだよ。みんなが「いつかやりたい」で止まってる間に、もう経験ひとつ増やしてる。あなたが先に動いたから、周りも「じゃあ私も」って動けたこともあると思う。<br><br><strong>後処理を未来の自分に丸投げする日はあるけどww　その勢いで人生いっぱい動かしてこー！！！</strong>',
+  relation:'一緒にいると予定増える組',rel:{親友:97,恋人:83,同居:52,悪ノリ:100}},
+ {id:'special',name:'好きだけ特別うさぎ',p:{E:55,O:55,C:55,A:82,N:55,AX:72,AV:30,BAS:55},w:{A:2,AX:2,AV:1.5},
+  checks:['好きな人のことは結構覚えてる','普通なら断ることも相手次第では許す','「この人だから」が普通にある','大切な人が困ってるとちょっと頑張る','誰にでも同じ優しさではない'],
+  text:'好きな人だけ明らかに待遇違うでしょwwww　はい、贔屓してます！！！<br><br>でも別にいいじゃん。誰にでも同じ100を配るより、「この人は大事」ってちゃんと特別にできるの、めちゃくちゃ人間らしいよ。そういう小さい特別扱いって、される側にはちゃんと伝わるから。<br><br><strong>大事な人くらい特別でいいって！！！好きな人にはいっぱい優しくして、いっぱい大事にしてこー！！！</strong>',
+  relation:'勝手に特別枠',rel:{親友:96,恋人:98,同居:82,悪ノリ:78}},
+ {id:'retreat',name:'一旦逃げるうさぎ',p:{E:35,O:50,C:55,A:55,N:72,AX:40,AV:88,BAS:30},w:{AV:3,N:2},
+  checks:['感情が大きい時ほど一人になりたい','その場で答えを求められると余計分からなくなる','時間を置くとちゃんと話せる','自分で整理してから言葉にしたい','戻る頃には結構冷静'],
+  text:'しんどくなったら一回どっか行くでしょwwww<br><br>でも、感情ぐちゃぐちゃのまま言葉をぶつけるより、一回離れて整理してから戻る方が自分に合ってるなら全然いいじゃん。自分が「今ちゃんと話せる状態じゃない」って分かるの、普通に自分の扱い上手いよ。<br><br><strong>消えっぱなしは困るけどww　戻れるなら、自分が戻りやすいやり方で向き合えばいいよ。</strong>',
+  relation:'一回解散してまた集合する組',rel:{親友:84,恋人:82,同居:64,悪ノリ:58}},
+ {id:'sensor',name:'人のこと見すぎうさぎ',p:{E:45,O:55,C:55,A:92,N:72,AX:66,AV:35,BAS:40},w:{A:3,N:1.5,AX:1.5},
+  checks:['「今日なんか違う」が結構分かる','人の言葉より雰囲気を拾うことがある','誰かが輪に入りにくそうだと気になる','相手が元気ないと理由まで考える','自分では普通にしてる気遣いが多い'],
+  text:'人のこと見すぎwwww　声のトーン、顔、返事の速さ、そこまで見てたん！？ってとこまで気づいてそう。<br><br>でも、そのセンサーがあるから、人が言葉にする前に気づけることもあるんだと思う。誰かが入りにくそうなら声かけたり、元気なさそうなら少し優しくしたり。<br><br><strong>きっと「気づいてくれてうれしかった」って思ってる人いるよ。全部背負わなくていいけど、その優しさまで鈍らせなくていいからね！！！</strong>',
+  relation:'気づいてくれる人枠',rel:{親友:97,恋人:87,同居:74,相談相手:99}},
+ {id:'survive',name:'なんとかするうさぎ',p:{E:60,O:65,C:40,A:50,N:25,AX:25,AV:40,BAS:82},w:{BAS:2.5,N:2,C:1},
+  checks:['本番直前に急に頭が回る','問題が起きると逆にやることが見える','完璧な準備がなくても動ける','「まあどうにかなる」が本当にどうにかなる','困った時に別ルートを見つけるのが早い'],
+  text:'準備ちょっと足りてなくない？wwww　なのに最終的になんか終わってる。謎です。<br><br>でも人生って予定してないこと普通に起きるじゃん。そういう時に「もう無理」じゃなく「じゃあ今できること何？」に切り替えられる人って、周りからするとかなり頼もしいよ。<br><br><strong>事前準備はもうちょいしてもいいけどww　その場で道を作れる力はちゃんと才能。自分の謎の生存能力、もっと信用していいって！！！</strong>',
+  relation:'なんか最後は完成してる組',rel:{仕事仲間:99,親友:88,恋人:79,悪ノリ:96}},
+ {id:'alone',name:'ひとり好きなくせに寂しうさぎ',p:{E:30,O:55,C:50,A:65,N:62,AX:72,AV:72,BAS:35},w:{E:2,AX:2,AV:2},
+  checks:['一人の予定も普通に楽しみ','でも誰からも連絡ない日が続くとちょっと寂しい','好きな人でもずっと一緒は疲れる','一人時間がある方が人にも優しくできる','「放っといて」と「いてほしい」が両方ある'],
+  text:'一人にしてほしい！！！でもずっと一人は寂しい！！！どっちなんwwww<br><br>でも全然矛盾してないよ。人とのつながりからもらえるものと、一人の時間でもらえるものって別だから。どっちも大事なら、どっちも取ればいいじゃん。<br><br><strong>一人も取る！好きな人も取る！人間そんな一個に決めなくていいって！！！</strong>',
+  relation:'放置できる親友枠',rel:{親友:98,恋人:84,毎日べったり:28,悪ノリ:72}},
+ {id:'overthink',name:'考えすぎて急に雑うさぎ',p:{E:45,O:82,C:48,A:55,N:88,AX:50,AV:50,BAS:60},w:{N:2.5,O:2,C:.8},
+  checks:['最初は細部まで気になる','比較を始めると選択肢が増える','考えすぎて突然「もうこれ！」になる','途中まで完璧を目指してた形跡はある','最後の決断だけ異様に速い時がある'],
+  text:'最初めっちゃ考えてたのに、急に「もうこれでいい！！！！」ってなるでしょwwww　脳みその閉店時間が急すぎる。<br><br>でも最初から雑なわけじゃないんだよね。ちゃんと考える力があるからこそ、どこかで手放す力も必要になる。考え続けたら永遠に完成しないし。<br><br><strong>細かく見る目もある、最後に手放す力もある。進むための雑さなら持っとこ！！！</strong>',
+  relation:'一回めっちゃ考えて最後ノリ組',rel:{創作仲間:99,親友:95,恋人:80,悪ノリ:85}},
+ {id:'schedule',name:'予定あると安心なくせに守らんうさぎ',p:{E:50,O:72,C:48,A:55,N:55,AX:40,AV:45,BAS:78},w:{C:1.5,O:1.5,BAS:2},
+  checks:['予定が何もない状態はちょっと落ち着かない','計画立てると安心する','でも当日その通りにはならない','面白い予定が後から来ると揺らぐ','「予定変更できる余白」も欲しい'],
+  text:'予定立てると安心する。でも予定通り動くとは言ってない。何それwwww<br><br>たぶん予定そのものが欲しいというより、「何も分からない状態」が嫌なんだと思う。とりあえず道が見えたら安心。でも面白そうな寄り道を見つけたらそっちにも行ける。<br><br><strong>安心できる道があるから寄り道できるんじゃん。道は作る、寄り道もする！人生まで予定表に従わせなくていいって！！！</strong>',
+  relation:'一緒にいると予定狂う組',rel:{親友:96,恋人:82,同居:48,悪ノリ:100}},
+ {id:'curious',name:'なんでも面白がるうさぎ',p:{E:60,O:94,C:50,A:55,N:25,AX:30,AV:35,BAS:78},w:{O:3,BAS:2,N:1},
+  checks:['知らないものを見つけるとちょっと気になる','人の変な話が好き','「なんで？」が割と多い','自分と違う考え方も観察したくなる','どうでもいいことから遊びを作れる'],
+  text:'「なにそれ！？」多くない？wwww　知らないもの見つけると、とりあえずちょっと気になるタイプ。<br><br>これめちゃくちゃいいと思う。同じ毎日でも「なんだこれ？」って思える人って、勝手に世界から遊びを見つけられるんだよ。そういう人が一人いると、普通の日までちょっとイベントになる。<br><br><strong>知らないものまだまだいっぱいあるよ！！！一生「なにそれ！？」って言える人生、普通にめっちゃ楽しそうじゃーん！！！</strong>',
+  relation:'なんでも企画になる組',rel:{親友:98,創作仲間:100,恋人:80,悪ノリ:100}},
+ {id:'close',name:'好きになると距離バグるうさぎ',p:{E:55,O:55,C:50,A:72,N:62,AX:92,AV:15,BAS:55},w:{AX:3,AV:3,A:1},
+  checks:['好きな相手のことはいっぱい知りたい','会えるなら割と会いたい','好きになるほど連絡の重要度が上がる','普通の人にはしないことをする','「大事！」が行動に出やすい'],
+  text:'普段そこまでじゃないのに、好きな人できた瞬間距離感どうした！？wwww　近い近い近いwwww<br><br>でも、そこまで誰かを好きになれるって普通にすごいよ。時間も気持ちも使って、それでも「もっと知りたい」「大事にしたい」って思える相手がいるって素敵なことじゃん。<br><br><strong>相手の心地いい距離はちゃんと見つつ、好きな気持ちそのものは小さくしなくていいからね。いっぱい大切にしてこ！！！</strong>',
+  relation:'好きになったら分かりやすい組',rel:{恋人:99,親友:86,毎日連絡:98,同居:83}}
+];
+
+function closeness(r,vals){
+  let total=0, ws=0;
+  for(const k of dims){
+    const w=r.w[k]||0.35;
+    total += Math.abs(vals[k]-r.p[k])*w;
+    ws += 100*w;
+  }
+  // extras as discriminators
+  if(r.id==='special') total -= Math.min(extras.intimacyGap*1.5,12);
+  if(r.id==='close'){ total -= Math.min(extras.intimacyGap*2.2,18); if(vals.AX>70)total-=7; if(vals.AV<35)total-=7; }
+  if(r.id==='schedule' && extras.selfFreedom!==null && extras.behaviorFreedom!==null){
+    const selfC=100-extras.selfFreedom, behC=100-extras.behaviorFreedom;
+    if(selfC>55 && behC<55) total-=15;
+  }
+  if(r.id==='overthink') total -= Math.min(extras.deliberationChange*4 + extras.stressShift*2,18);
+  if(r.id==='noisy' && extras.seat==='far' && vals.E>55) total-=8;
+  return Math.max(0,1-total/ws);
+}
+function specialBadges(vals){
+  const out=[];
+  if(extras.selfFreedom!==null && extras.behaviorFreedom!==null){
+    if(extras.selfFreedom-extras.behaviorFreedom>30) out.push({t:'自由人名乗り',d:'自分ではかなり自由人寄り。でも実際の選択は思ったより安心を取りにいってましたwwww　安全基地付き自由人、普通に強いよ。'});
+    if(extras.behaviorFreedom-extras.selfFreedom>35) out.push({t:'意外と飛ぶ',d:'自分ではそこまで自由人だと思ってないのに、行動では結構そっち行くじゃんwwww　本人が思ってるより冒険する人でした。'});
+  }
+  if(vals.E>62 && extras.socialMood<45) out.push({t:'人見知り名乗り',d:'人が嫌いというより、起動に時間がかかるタイプかも。安心した後は普通に人間好きじゃんwwww'});
+  if(vals.N>72 && vals.O>68) out.push({t:'脳内営業中',d:'外から静かでも中はめっちゃ動いてますwwww　考えられる力、ちゃんとあるよ。'});
+  if(extras.deliberationChange>=2) out.push({t:'考えたら変わる',d:'直感の答えと、ゆっくり考えた答えが違いました。最初の勢いも、考え直す力も両方あるタイプ。'});
+  return out.slice(0,2);
+}
+function userSpecificChecks(main,hidden,vals){
+  const all=[...main.checks.slice(0,3)];
+  if(hidden) all.push(hidden.checks[0]);
+  if(vals.E<35) all.push('一人の時間、普通に必要');
+  if(vals.E>70) all.push('喋り始めると結構元気になる');
+  if(vals.O>78) all.push('知らないものへの「なにそれ？」が強め');
+  if(vals.C<38) all.push('準備より先に始める時がある');
+  if(vals.C>70) all.push('見通しがあるとかなり安心する');
+  if(vals.A>78) all.push('人のこと、思ってる以上にちゃんと見てる');
+  if(vals.N>75) all.push('納得できるまで頭の中で処理しがち');
+  if(vals.AX>75) all.push('大事な人のことになると気になる量が増える');
+  if(vals.AV>72) all.push('近すぎると一人時間を取りたくなる');
+  if(vals.BAS>80) all.push('面白そうへの反応だけ異様に速い');
+  return [...new Set(all)].slice(0,6);
+}
+function showAnalysis(){
+  const vals=Object.fromEntries(dims.map(k=>[k,normalize(k)]));
+  // mild correction from obvious extras
+  if(extras.socialMood!==null){ vals.E=Math.round((vals.E*3 + extras.socialMood)/4); }
+  const ranked = rabbits.map(r=>({r,c:closeness(r,vals)})).sort((a,b)=>b.c-a.c);
+  const main=ranked[0].r, hidden=ranked[1].r;
+  const confidence=Math.round((ranked[0].c*100));
+  const badges=specialBadges(vals);
+  const checks=userSpecificChecks(main,hidden,vals);
+  const density=confidence>=84?'かなり濃い':confidence>=72?'けっこう濃い':'場面によって変わる';
+  const rel = Object.entries(main.rel).sort((a,b)=>b[1]-a[1]);
+  const relHtml = rel.map(([k,v])=>`<div class="meterrow"><span>${k}</span><div class="meter"><span style="width:${v}%"></span></div><strong>${v}</strong></div>`).join('');
+  const badgesHtml = badges.length?`<div class="section"><h3>🏷️ ちなみにこんなのも出てます</h3>${badges.map(b=>`<div class="relationship"><strong>${b.t}</strong><p>${b.d}</p></div>`).join('')}</div>`:'';
+
+  setHTML(`
+  <div class="result-head">
+    <div class="rabbit">🐰</div>
+    <p class="small">解析完了</p>
+    <div class="type-title">${main.name}</div>
+    <div><span class="badge">うさぎ濃度：${density}</span><span class="badge">隠れ：${hidden.name}</span></div>
+  </div>
+
+  <div class="section">
+    <h3>これ、あるでしょ？ww</h3>
+    <div class="checks">${checks.map(x=>`<div class="check">☑ ${x}</div>`).join('')}</div>
+  </div>
+
+  <div class="section">
+    <h3>しゅりからひとこと</h3>
+    <div class="quote">${main.text}</div>
+  </div>
+
+  <div class="section">
+    <h3>🐰 実はちょっと入ってます</h3>
+    <div class="relationship"><strong>${hidden.name}</strong><p>${hidden.checks[0]}。メインだけじゃなく、こういう成分も少しありそう。</p></div>
+  </div>
+
+  ${badgesHtml}
+
+  <div class="section">
+    <h3>💪🏻🐰 しゅりと組むなら</h3>
+    <div class="relationship">
+      <div class="small">推奨関係</div>
+      <h2 style="margin-top:6px">${main.relation}</h2>
+      ${relHtml}
+      <p style="line-height:1.8">似てるから相性がいい、だけじゃなくて「どういう距離なら楽しいか」を見てるよ。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>性格の中身</h3>
+    ${[
+      ['人間で充電',vals.E],['知らんもん触りたい',vals.O],['ちゃんとする気',vals.C],['人間とうまくやる気',vals.A],
+      ['脳内大事件',vals.N],['好きな人が気になる',vals.AX],['近すぎると離れたい',vals.AV],['面白そうに釣られる',vals.BAS]
+    ].map(([k,v])=>`<div class="meterrow"><span>${k}</span><div class="meter"><span style="width:${v}%"></span></div><strong>${v}</strong></div>`).join('')}
+    <p class="small">※数値はこのサイト内の回答傾向を見やすくした内部スコア。心理検査の偏差値や医学的な指標ではありません。</p>
+  </div>
+
+  <div class="section center">
+    <h2>この性格ごと、楽しく生きてこー！！！🐰</h2>
+    <p class="sub">性格って全部きれいな長所に直さなくていいと思うの。<br>めんどくさいところも変なところもある。でも同じところから、優しさだったり行動力だったり面白さだったりも出てるじゃん。<br><br><strong>だったら自分の扱い方だけ覚えて、この性格ごと楽しく生きてこー！！！</strong></p>
+    <button class="btn accent" onclick="location.reload()">もう一回やる</button>
+  </div>
+  `);
+}
+
+render();
+</script>
+</body>
+</html>
