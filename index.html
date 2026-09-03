@@ -31,6 +31,9 @@ h1{font-size:34px;line-height:1.12;margin:0 0 10px}
 h2{font-size:28px;line-height:1.18;margin:0 0 12px}
 .sub{color:var(--muted);line-height:1.7}
 .small{font-size:12px;color:var(--muted)}
+.micro{font-size:10px;color:#aaa0aa;text-align:center;margin:8px 0 0;line-height:1.45}
+.linked-note{font-size:12px;line-height:1.65;color:#756b78;background:#faf6fb;border:1px dashed #dfd2dc;border-radius:14px;padding:10px 12px;margin:0 0 16px}
+.linked-note strong{color:#4b424d}
 .center{text-align:center}
 .btn{border:none;border-radius:18px;padding:15px 18px;background:#25202a;color:white;font-weight:800;cursor:pointer;width:100%;margin-top:14px}
 .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
@@ -163,8 +166,19 @@ function intro(){
     </div>`);
 }
 function sliderScreen(title,left,right,onDone,initial=50,extra=''){
-  setHTML(`<h2>${title}</h2>${extra}<div class="slider-wrap"><div class="labels"><span>${left}</span><span>${right}</span></div><input id="r" type="range" min="0" max="100" value="${initial}"></div><button id="ok" class="btn accent">これ！</button>`);
-  document.getElementById('ok').onclick=()=>onDone(+document.getElementById('r').value);
+  setHTML(`<h2>${title}</h2>${extra}<div class="slider-wrap"><div class="labels"><span>${left}</span><span>${right}</span></div><input id="r" type="range" min="0" max="100" value="${initial}"></div><button id="ok" class="btn accent">これ！</button><p class="micro">※決めたら変更できないよ</p>`);
+  const r=document.getElementById('r');
+  let touched=false;
+  ['input','change','touchstart','pointerdown'].forEach(ev=>r.addEventListener(ev,()=>{touched=true},{passive:true}));
+  document.getElementById('ok').onclick=()=>{
+    const v=+r.value;
+    if(!touched){
+      toast('動かさないんかい！wwww');
+      setTimeout(()=>onDone(v),650);
+    }else{
+      onDone(v);
+    }
+  };
 }
 function multiSelectScreen(title,items,max,onDone,sub=''){
   setHTML(`<h2>${title}</h2><p class="sub">${sub}</p><div class="float-cloud" id="cloud">${items.map(x=>`<button class="pill" data-v="${x}">${x}</button>`).join('')}</div><button id="ok" class="btn accent" disabled>これで！</button>`);
@@ -177,8 +191,8 @@ function multiSelectScreen(title,items,max,onDone,sub=''){
   });
   document.getElementById('ok').onclick=()=>onDone(selected);
 }
-function chooseScreen(title,choices,onDone,sub=''){
-  setHTML(`<h2>${title}</h2><p class="sub">${sub}</p><div class="grid">${choices.map((c,i)=>`<button class="choice large" data-i="${i}">${c}</button>`).join('')}</div>`);
+function chooseScreen(title,choices,onDone,sub='',linked=''){
+  setHTML(`<h2>${title}</h2>${linked?`<div class="linked-note">${linked}</div>`:''}<p class="sub">${sub}</p><div class="grid">${choices.map((c,i)=>`<button class="choice large" data-i="${i}">${c}</button>`).join('')}</div><p class="micro">※選んだら変更できないよ</p>`);
   app.querySelectorAll('.choice').forEach(el=>el.onclick=()=>onDone(+el.dataset.i));
 }
 function render(){
@@ -223,7 +237,7 @@ function render(){
         <button class="seat" data-s="floor" style="left:18px;bottom:30px">床</button>
         <button class="seat" data-s="far" style="right:30px;bottom:30px">離れた椅子</button>
         <button class="seat" data-s="middle" style="left:42%;bottom:40px">真ん中</button>
-      </div>`);
+      </div><p class="micro">※座る場所を選んだら変更できないよ</p>`);
       app.querySelectorAll('.seat').forEach(el=>el.onclick=()=>{
         const s=el.dataset.s; extras.seat=s;
         if(s==='near'){add('E',2);add('AV',-1)}
@@ -279,7 +293,7 @@ function render(){
       setHTML(`<h2>帰るだけです。どっち行く？</h2><div class="pathbox">
         <button class="path safe" id="safe"><span>いつもの道</span></button>
         <button class="path unknown" id="unknown"><span>なんか知らん道 ✨</span></button>
-      </div>`);
+      </div><p class="micro">※道を選んだら変更できないよ</p>`);
       document.getElementById('safe').onclick=()=>{add('O',-1.5);add('C',.5);toast('今日は帰ろ帰ろ');next()};
       document.getElementById('unknown').onclick=()=>{add('O',2);add('BAS',1.5);toast('絶対なんかあるもんね！！');next()};
       break;
@@ -311,21 +325,50 @@ function render(){
     case 14:
       setHTML(`<h2>明日の予定、好きに作って</h2><p class="sub">押した順に入るよ。もういいと思ったら終わり。</p>
       <div class="grid" id="cards">${['起きる','ごはん','仕事/学校','遊ぶ','休む','風呂','寝る'].map(x=>`<button class="choice" data-v="${x}">${x}</button>`).join('')}</div>
-      <div class="timeline" id="tl"><div class="small">ここに予定が入ります</div></div><button class="btn secondary" id="done">もういい</button>`);
+      <div class="timeline" id="tl"><div class="small">ここに予定が入ります</div></div><p class="micro">※予定を押したら追加されるよ。追加したものは変更できないよ</p><button class="btn secondary" id="done">もういい</button>`);
       const arr=[];
+      const scheduleComment=(added)=>{
+        const i=arr.length-1;
+        const has=(x)=>arr.includes(x);
+        const pos=(x)=>arr.indexOf(x);
+        if(i===0 && added==='寝る') return '初手寝るんかいwwww';
+        if(i===0 && added==='風呂') return '起きてないのに風呂から始まるんだwwww';
+        if(i===0 && added==='仕事/学校') return '起きる前に出勤してる！？wwww';
+        if(i===0 && added==='ごはん') return 'まず食べるんだwwww 起きてる！？';
+        if(added==='起きる' && i>0) return 'ここで起きるんかいwwww';
+        if(has('寝る') && added!=='寝る' && pos('寝る')<i) return '寝たあとまだ予定あるんかいwwww';
+        if(added==='寝る' && !has('起きる')) return 'まだ起きてないのに寝るのねwwww';
+        if(added==='風呂' && has('寝る') && pos('寝る')<i) return '寝たあと風呂入るんかいwwww';
+        if(added==='仕事/学校' && !has('起きる')) return '起床なしで仕事/学校いくの強すぎwwww';
+        if(added==='遊ぶ' && !has('起きる')) return '寝たまま遊びに行ってない？wwww';
+        if(added==='ごはん' && has('寝る') && pos('寝る')<i) return '寝たあとごはん！？二次会？wwww';
+        if(arr.length>=6) return '一日ぎっちぎちじゃんwwww';
+        return '';
+      };
       app.querySelectorAll('[data-v]').forEach(el=>el.onclick=()=>{
         if(arr.includes(el.dataset.v))return;
         arr.push(el.dataset.v); el.classList.add('selected');
         document.getElementById('tl').innerHTML=arr.map((x,i)=>`<div class="slot">${i+1}. ${x}</div>`).join('');
+        const c=scheduleComment(el.dataset.v);
+        if(c) toast(c);
       });
-      document.getElementById('done').onclick=()=>{extras.scheduleCreated=arr.length;add('C',(arr.length-3)/1.5);toast(arr.length>5?'めっちゃ組むじゃんww':'なるほどそのくらいね');next()};
+      document.getElementById('done').onclick=()=>{
+        extras.scheduleCreated=arr.length;add('C',(arr.length-3)/1.5);
+        let msg='なるほどそのくらいね';
+        if(arr.length===0) msg='予定ゼロで終わるんかいwwww';
+        else if(arr[0]==='寝る') msg='最後まで初手「寝る」なの面白すぎwwww';
+        else if(arr.includes('寝る') && arr.indexOf('寝る')<arr.length-1) msg='寝たあとも活動してるスケジュールwwww';
+        else if(!arr.includes('起きる') && arr.length>=3) msg='結局一回も起きてないwwww';
+        else if(arr.length>5) msg='めっちゃ組むじゃんww';
+        toast(msg);setTimeout(next,700)
+      };
       break;
 
     case 15:
       sliderScreen('SYSTEM：予定が変更されました','😌','🤬',v=>{
         add('C',(v-50)/22);add('N',(v-50)/30);add('BAS',(50-v)/70);
         extras.stressShift += Math.abs(v-50)/25; toast(v>75?'そんな怒る！？ww':'意外と平気ね'); next();
-      },55,'<p class="sub">さっき作った予定、勝手に動かしました。お気持ちをどうぞ。</p>');
+      },55,'<div class="linked-note"><strong>さっきの「明日の予定」とつながってるよ！</strong><br>自分で作った予定が急に変わった時、どのくらい気持ちが動くか見てるやつ。</div><p class="sub">さっき作った予定、勝手に動かしました。お気持ちをどうぞ。</p>');
       break;
 
     case 16:
@@ -338,7 +381,7 @@ function render(){
       break;
 
     case 17:
-      setHTML(`<h2>なんか一人だけ違くない？</h2><p class="sub">気になった人を押して</p><div class="face-grid">${['🙂','🙂','🙂','😐','🙂'].map((x,i)=>`<button class="face" data-i="${i}">${x}</button>`).join('')}</div>`);
+      setHTML(`<h2>なんか一人だけ違くない？</h2><p class="sub">気になった人を押して</p><div class="face-grid">${['🙂','🙂','🙂','😐','🙂'].map((x,i)=>`<button class="face" data-i="${i}">${x}</button>`).join('')}</div><p class="micro">※押したら変更できないよ</p>`);
       app.querySelectorAll('.face').forEach(el=>el.onclick=()=>{const hit=+el.dataset.i===3;if(hit){add('A',2);add('N',.5)}else{add('A',.3)}toast('そこ見たんだ');next()});
       break;
 
@@ -349,7 +392,7 @@ function render(){
       break;
 
     case 19:
-      setHTML(`<h2>明日丸一日休み！</h2><p class="sub">5秒で決めて！！！</p><div class="countdown" id="cd">5</div><div class="grid" id="quick">${['知らん街行く','家でゴロゴロ','友達呼ぶ','一人で趣味','なんか新しいこと'].map((x,i)=>`<button class="choice" data-i="${i}">${x}</button>`).join('')}</div>`);
+      setHTML(`<h2>明日丸一日休み！</h2><p class="sub">5秒で決めて！！！</p><div class="countdown" id="cd">5</div><div class="grid" id="quick">${['知らん街行く','家でゴロゴロ','友達呼ぶ','一人で趣味','なんか新しいこと'].map((x,i)=>`<button class="choice" data-i="${i}">${x}</button>`).join('')}</div><p class="micro">※選んだら変更できないよ</p>`);
       let t=5, chosen=null; const int=setInterval(()=>{t--;document.getElementById('cd').textContent=Math.max(t,0);if(t<=0){clearInterval(int);if(chosen===null){extras.deliberationChange+=1;add('C',1);toast('時間切れwwww');setTimeout(next,500)}}},1000);
       app.querySelectorAll('#quick .choice').forEach(el=>el.onclick=()=>{if(chosen!==null)return;chosen=+el.dataset.i;clearInterval(int);extras.quickChoice=chosen;add('BAS',1.5);if([0,4].includes(chosen)){add('O',1.5);add('BAS',1)}if(chosen===1){add('E',-1)}if(chosen===2){add('E',1.5)}toast('決めた！');next()});
       break;
@@ -362,11 +405,11 @@ function render(){
         if(i===2) add('E',1);
         if(i===1||i===3) add('E',-.6);
         toast(extras.quickChoice===i?'意志かたww':'変わったwwww');next();
-      });
+      },'', '<strong>さっきの5秒で決めた問題とセットだよ！</strong><br>今度はゆっくり考えたら答えが変わるのか見てる。だから同じでも、変わっても、どっちでもOK！');
       break;
 
     case 21:
-      setHTML(`<h2>今日ちょっとイヤなことありました</h2><p class="sub">最初にやりそうな順に3個選んで</p><div class="grid">${['誰かに話す','一人で考える','寝る','食べる','音楽聴く','動く','何もせん','一旦忘れる'].map(x=>`<button class="choice" data-v="${x}">${x}</button>`).join('')}</div><div id="picked" class="small" style="margin-top:14px"></div>`);
+      setHTML(`<h2>今日ちょっとイヤなことありました</h2><p class="sub">最初にやりそうな順に3個選んで</p><div class="grid">${['誰かに話す','一人で考える','寝る','食べる','音楽聴く','動く','何もせん','一旦忘れる'].map(x=>`<button class="choice" data-v="${x}">${x}</button>`).join('')}</div><div id="picked" class="small" style="margin-top:14px"></div><p class="micro">※選んだら変更できないよ</p>`);
       const pick=[];
       app.querySelectorAll('[data-v]').forEach(el=>el.onclick=()=>{
         if(pick.includes(el.dataset.v)||pick.length>=3)return;
@@ -399,7 +442,7 @@ function render(){
         extras.intimacyGap += Math.abs((extras.conflictNormal??50)-v)/20;
         add('AV',(v-50)/22); add('AX',(50-v)/28);
         toast(Math.abs((extras.conflictNormal??50)-v)>25?'変わるやんwwwwww':'そこは変わらんのね！'); next();
-      },50);
+      },50,'<div class="linked-note"><strong>ひとつ前の「喧嘩した時の距離」とつながってるよ！</strong><br>相手がめっちゃ好きな人でも、ほしい距離が同じか変わるか見てる。さっきと同じ答えでも全然OK！</div>');
       break;
 
     case 24:
@@ -413,8 +456,9 @@ function render(){
         extras.behaviorFreedom=i===1?85:25;
         if(i===1){add('O',1.8);add('BAS',1.8);add('C',-.5)}
         else{add('C',1.8);add('O',-.3)}
-        toast('なるほどなるほど');next();
-      },'どっちも楽しそうです。');
+        const gap=Math.abs((extras.selfFreedom??50)-extras.behaviorFreedom);
+        toast(gap>35?'あれ？さっきの自己申告とちょっと違うぞwwww':'なるほど、さっきの自己申告と近いね！');next();
+      },'どっちも楽しそうです。','<strong>ひとつ前の「自分は自由人？きっちり人間？」とセットだよ！</strong><br>自分で思ってる自分と、実際にこういう場面で選ぶ行動が同じか見てる。違っても全然おかしくないよ！');
       break;
 
     case 26:
